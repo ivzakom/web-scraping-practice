@@ -45,7 +45,7 @@ func main() {
 
 	c := colly.NewCollector(
 		colly.AllowedDomains("gurievsk.gov39.ru"),
-		colly.CacheDir("./gurievsk_cache"),
+		colly.CacheDir("./cash/gurievsk_cache"),
 	)
 
 	c.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.107 Safari/537.36"
@@ -120,7 +120,7 @@ func main() {
 					newPlot.CadastreNumber = matches[0][5:]
 				}
 
-				re = regexp.MustCompile(`по адресу:\s*(.*?)(?:,?\s*(КН|площадью|$))`)
+				re = regexp.MustCompile(`по адресу:\s*(.*?),?\s*(КН|площадью|$)`)
 				if matches := re.FindStringSubmatch(paragraph); len(matches) > 0 {
 					newPlot.Address = matches[0]
 				}
