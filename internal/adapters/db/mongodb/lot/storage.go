@@ -1,7 +1,7 @@
-package lot
+package mongodb
 
 import (
-	. "github.com/ivzakom/web-scraping-practice/internal/domain/entity/lot"
+	. "github.com/ivzakom/web-scraping-practice/internal/domain/entity"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 )
 

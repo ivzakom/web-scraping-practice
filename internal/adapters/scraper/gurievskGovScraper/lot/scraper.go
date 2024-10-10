@@ -1,9 +1,9 @@
-package scraper
+package gurievskGovScraper
 
 import (
 	"fmt"
 	"github.com/gocolly/colly"
-	"github.com/ivzakom/web-scraping-practice/internal/domain/entity/lot"
+	"github.com/ivzakom/web-scraping-practice/internal/domain/entity"
 	"log"
 	"regexp"
 	"strconv"
@@ -23,7 +23,7 @@ func NewGurievskGovScraper() *gurievskGovScraper {
 	}
 }
 
-func (s *gurievskGovScraper) ScrapLot() ([]lot.Lot, error) {
+func (s *gurievskGovScraper) ScrapLot() ([]entity.Lot, error) {
 
 	var err error
 
@@ -36,7 +36,7 @@ func (s *gurievskGovScraper) ScrapLot() ([]lot.Lot, error) {
 
 	detailCollector := c.Clone()
 
-	Lots := make([]lot.Lot, 0, 200)
+	Lots := make([]entity.Lot, 0, 200)
 
 	c.OnRequest(func(r *colly.Request) {
 		log.Println("visiting", r.URL.String())
@@ -88,7 +88,7 @@ func (s *gurievskGovScraper) ScrapLot() ([]lot.Lot, error) {
 		for _, paragraph := range paragraphList {
 			if strings.HasPrefix(paragraph, "Лот") {
 
-				newPlot := lot.Lot{
+				newPlot := entity.Lot{
 					Description:     paragraph,
 					DocURL:          e.Request.AbsoluteURL(e.Attr("href")),
 					PublicationDate: date,
