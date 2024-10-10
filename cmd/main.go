@@ -4,7 +4,7 @@ import (
 	"context"
 	mongodb "github.com/ivzakom/web-scraping-practice/internal/adapters/db/mongodb/lot"
 	"github.com/ivzakom/web-scraping-practice/internal/config"
-	"github.com/ivzakom/web-scraping-practice/internal/domain/entity/lot"
+	"github.com/ivzakom/web-scraping-practice/internal/domain/service"
 	mongo "github.com/ivzakom/web-scraping-practice/pkg/client/mongodb"
 )
 
@@ -17,9 +17,8 @@ func main() {
 		panic(err)
 	}
 
-	// Инициализация хранилища (например, InMemory или Gorm)
 	lotStorage := mongodb.NewLotStorage(MongoDBCient)
-	lotService := lot.NewLotService(lotStorage)
+	lotService := service.NewLotService(lotStorage)
 
 	//// Инициализация скреперов
 	//platformAScraper := scraper.NewPlatformAScraper("https://platforma.com/lots")
