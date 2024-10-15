@@ -17,7 +17,7 @@ func NewClient(ctx context.Context, host, port, username, password, database, au
 	} else {
 		mongoDBURL = fmt.Sprintf("mongodb://%s:%s@%s:%s", username, password, host, port)
 	}
-	reqCtx, cancel := context.WithTimeout(ctx, 10*time.Second)
+	reqCtx, cancel := context.WithTimeout(ctx, 20*time.Second)
 	defer cancel()
 	clientOptions := options.Client().ApplyURI(mongoDBURL)
 	if !anonymous {

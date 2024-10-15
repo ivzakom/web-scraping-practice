@@ -3,7 +3,7 @@ package entity
 import "time"
 
 type Lot struct {
-	UUID            string    `json:"uuid"`
+	ID              string    `json:"id"`
 	Description     string    `json:"description,omitempty"`
 	Address         string    `json:"address,omitempty"`
 	CadastreNumber  string    `json:"cadastre_number,omitempty"`
@@ -13,7 +13,7 @@ type Lot struct {
 }
 
 type LotView struct {
-	UUID           string `json:"uuid"`
+	ID             string `json:"id"`
 	Description    string `json:"description,omitempty"`
 	Address        string `json:"address,omitempty"`
 	CadastreNumber string `json:"cadastre_number,omitempty"`

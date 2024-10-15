@@ -1,28 +1,36 @@
 package service
 
-import "github.com/ivzakom/web-scraping-practice/internal/domain/entity"
+import (
+	"context"
+	"github.com/ivzakom/web-scraping-practice/internal/domain/entity"
+)
 
 type LotStorage interface {
 	GetOne(id string) entity.Lot
-	GetAll(limit, offset int) []entity.Lot
+	GetAll(ctx context.Context) ([]entity.LotView, error)
 	Create(lot entity.Lot) entity.Lot
 	Delete(lot entity.Lot) error
 }
 
-type lotService struct {
-	lotStorage LotStorage
+type LotScraper interface {
+	ScrapLot() ([]entity.Lot, error)
 }
 
-func NewLotService(storage LotStorage) *lotService {
-	return &lotService{storage}
+type lotService struct {
+	lotStorage LotStorage
+	lotScraper LotScraper
+}
+
+func NewLotService(storage LotStorage, scraper LotScraper) *lotService {
+	return &lotService{storage, scraper}
 }
 
 func (s lotService) GetOne(id string) entity.Lot {
 	return entity.Lot{}
 }
 
-func (s lotService) GetAll(limit, offset int) []entity.Lot {
-	return s.lotStorage.GetAll(limit, offset)
+func (s lotService) GetAll(ctx context.Context) ([]entity.LotView, error) {
+	return s.lotStorage.GetAll(ctx)
 }
 
 func (s lotService) Create(lot entity.Lot) entity.Lot {
@@ -31,4 +39,8 @@ func (s lotService) Create(lot entity.Lot) entity.Lot {
 
 func (s lotService) Delete(lot entity.Lot) error {
 	return s.lotStorage.Delete(lot)
+}
+
+func (s lotService) ScrapLot() ([]entity.Lot, error) {
+	return s.lotScraper.ScrapLot()
 }

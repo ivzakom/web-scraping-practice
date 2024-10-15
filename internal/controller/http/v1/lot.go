@@ -2,6 +2,7 @@ package v1
 
 import (
 	"context"
+	"encoding/json"
 	"github.com/ivzakom/web-scraping-practice/internal/domain/entity"
 	lot_usecase "github.com/ivzakom/web-scraping-practice/internal/domain/usecase/lot"
 	"github.com/julienschmidt/httprouter"
@@ -23,6 +24,10 @@ type lotHandler struct {
 	lotUseCase LotUseCase
 }
 
+func (h *lotHandler) Register(r *httprouter.Router) {
+	r.GET(lotsURL, h.GetAllLots)
+}
+
 func NewLotHandler(lotUseCase LotUseCase) *lotHandler {
 	return &lotHandler{lotUseCase: lotUseCase}
 }
@@ -32,11 +37,15 @@ func (h *lotHandler) CreateLot(w http.ResponseWriter, r *http.Request, params ht
 }
 
 func (h *lotHandler) GetAllLots(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
-	//lots, err := h.lotUseCase.GetAllLots(context.Background())
-	//if err != nil {
-	//	return
-	//}
-	w.Write([]byte("lots"))
+	lots, err := h.lotUseCase.GetAllLots(context.Background())
+	if err != nil {
+		return
+	}
+	marshal, err := json.Marshal(lots)
+	if err != nil {
+		return
+	}
+	w.Write([]byte(marshal))
 	w.WriteHeader(http.StatusOK)
 }
 
