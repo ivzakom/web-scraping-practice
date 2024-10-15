@@ -2,10 +2,21 @@ package main
 
 import (
 	"context"
+	"fmt"
 	mongodb "github.com/ivzakom/web-scraping-practice/internal/adapters/db/mongodb/lot"
+	gurievskGovScraper "github.com/ivzakom/web-scraping-practice/internal/adapters/scraper/gurievskGovScraper/lot"
 	"github.com/ivzakom/web-scraping-practice/internal/config"
+	v1 "github.com/ivzakom/web-scraping-practice/internal/controller/http/v1"
 	"github.com/ivzakom/web-scraping-practice/internal/domain/service"
+	lot_usecase "github.com/ivzakom/web-scraping-practice/internal/domain/usecase/lot"
 	mongo "github.com/ivzakom/web-scraping-practice/pkg/client/mongodb"
+	"github.com/julienschmidt/httprouter"
+	"net"
+	"net/http"
+	"os"
+	"path"
+	"path/filepath"
+	"time"
 )
 
 func main() {
@@ -18,31 +29,54 @@ func main() {
 	}
 
 	lotStorage := mongodb.NewLotStorage(MongoDBCient)
-	lotService := service.NewLotService(lotStorage)
+	lotScraper := gurievskGovScraper.NewGurievskGovScraper()
+	lotService := service.NewLotService(lotStorage, lotScraper)
+	lotUseCase := lot_usecase.NewLotUseCase(lotService)
+	lotHandler := v1.NewLotHandler(lotUseCase)
 
-	//// Инициализация скреперов
-	//platformAScraper := scraper.NewPlatformAScraper("https://platforma.com/lots")
-	//
-	//// Инициализация службы скрапинга с скреперами
-	//scraperService := scraper.NewScraperService(lotService, []scraper.Scraper{
-	//	platformAScraper,
-	//	platformBScraper,
-	//	// Добавьте другие скреперы здесь
-	//})
-	//
-	//// Запуск процесса скрапинга
-	//err := scraperService.ScrapAll()
-	//if err != nil {
-	//	log.Fatalf("Ошибка при скрапинге: %v", err)
-	//}
-	//
-	//// Пример получения лотов
-	//lots, err := lotService.GetAll(10, 0)
-	//if err != nil {
-	//	log.Fatalf("Ошибка при получении лотов: %v", err)
-	//}
-	//
-	//for _, lot := range lots {
-	//	log.Printf("Лот: %+v\n", lot)
-	//}
+	router := httprouter.New()
+	lotHandler.Register(router)
+
+	start(router, cfg)
+
+}
+
+func start(router *httprouter.Router, cfg *config.Config) {
+
+	//logger := logging.GetLogger()
+	//logger.Info("start server")
+
+	var listener net.Listener
+	var listenErr error
+
+	if cfg.Listen.Type == "sock" {
+		appdir, err := filepath.Abs(filepath.Dir(os.Args[0]))
+		if err != nil {
+			//logger.Fatal(err)
+		}
+		//logger.Info("create socket ")
+		socketPath := path.Join(appdir, "app.sock")
+		//logger.Debugf("socket path: %s", socketPath)
+
+		//logger.Info("listen unix socket")
+		listener, listenErr = net.Listen("unix", socketPath)
+
+	} else {
+		//logger.Info("listen unix")
+		listener, listenErr = net.Listen("tcp", fmt.Sprintf("%s:%s", cfg.Listen.BindIp, cfg.Listen.Port))
+		//logger.Info(fmt.Sprintf("start is lissening %s:%s", cfg.Listen.BindIp, cfg.Listen.Port))
+	}
+
+	if listenErr != nil {
+		panic(listenErr)
+	}
+
+	server := &http.Server{
+		Handler:      router,
+		WriteTimeout: 10 * time.Second,
+		ReadTimeout:  15 * time.Second,
+	}
+
+	server.Serve(listener)
+
 }

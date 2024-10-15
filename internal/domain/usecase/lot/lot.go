@@ -7,10 +7,16 @@ import (
 
 type LotService interface {
 	Create(lot entity.Lot) entity.Lot
+	GetAll(context.Context) ([]entity.LotView, error)
+	ScrapLot() ([]entity.Lot, error)
 }
 
 type lotUseCase struct {
 	lotService LotService
+}
+
+func NewLotUseCase(lotService LotService) *lotUseCase {
+	return &lotUseCase{lotService}
 }
 
 func (u lotUseCase) CreateLot(ctx context.Context, dto CreateLotDto) (string, error) {
@@ -20,8 +26,21 @@ func (u lotUseCase) CreateLot(ctx context.Context, dto CreateLotDto) (string, er
 }
 
 func (u lotUseCase) GetAllLots(ctx context.Context) ([]entity.LotView, error) {
-	return nil, nil
+	all, err := u.lotService.GetAll(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return all, nil
 }
+
 func (u lotUseCase) UpdateLots(ctx context.Context) error {
-	return nil
+
+	lots, err := u.lotService.ScrapLot()
+	if err != nil {
+		return err
+	}
+	for _, lot := range lots {
+		u.lotService.Create(lot)
+	}
+	return err
 }
