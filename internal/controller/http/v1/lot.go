@@ -4,18 +4,16 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/ivzakom/web-scraping-practice/internal/domain/entity"
-	lot_usecase "github.com/ivzakom/web-scraping-practice/internal/domain/usecase/lot"
 	"github.com/julienschmidt/httprouter"
 	"net/http"
 )
 
 const (
-	lotURL  = "/lots/:lot_id"
-	lotsURL = "/lots"
+	lotsURL    = "/lots"
+	updateLots = "/lots/update"
 )
 
 type LotUseCase interface {
-	CreateLot(ctx context.Context, dto lot_usecase.CreateLotDto) (string, error)
 	GetAllLots(ctx context.Context) ([]entity.LotView, error)
 	UpdateLots(ctx context.Context) error
 }
@@ -26,14 +24,11 @@ type lotHandler struct {
 
 func (h *lotHandler) Register(r *httprouter.Router) {
 	r.GET(lotsURL, h.GetAllLots)
+	r.GET(updateLots, h.UpdateLots)
 }
 
-func NewLotHandler(lotUseCase LotUseCase) *lotHandler {
-	return &lotHandler{lotUseCase: lotUseCase}
-}
-
-func (h *lotHandler) CreateLot(w http.ResponseWriter, r *http.Request, params httprouter.Param) {
-	//TODO
+func NewLotHandler(lotUseCase LotUseCase) lotHandler {
+	return lotHandler{lotUseCase: lotUseCase}
 }
 
 func (h *lotHandler) GetAllLots(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
@@ -45,7 +40,10 @@ func (h *lotHandler) GetAllLots(w http.ResponseWriter, r *http.Request, params h
 	if err != nil {
 		return
 	}
-	w.Write([]byte(marshal))
+	_, err = w.Write([]byte(marshal))
+	if err != nil {
+		return
+	}
 	w.WriteHeader(http.StatusOK)
 }
 

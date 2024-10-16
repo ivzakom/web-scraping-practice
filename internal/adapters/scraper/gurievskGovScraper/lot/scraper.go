@@ -16,14 +16,14 @@ type gurievskGovScraper struct {
 	BaseParam string
 }
 
-func NewGurievskGovScraper() *gurievskGovScraper {
-	return &gurievskGovScraper{
+func NewGurievskGovScraper() gurievskGovScraper {
+	return gurievskGovScraper{
 		BaseURL:   "gurievsk.gov39.ru/grazhdanam/land-lease/",
 		BaseParam: "SECTION_ID=7247",
 	}
 }
 
-func (s *gurievskGovScraper) ScrapLot() ([]entity.Lot, error) {
+func (s *gurievskGovScraper) Scrap() ([]entity.Lot, error) {
 
 	var err error
 
@@ -86,6 +86,8 @@ func (s *gurievskGovScraper) ScrapLot() ([]entity.Lot, error) {
 		paragraphList := strings.Split(e.Text, "\n")
 
 		for _, paragraph := range paragraphList {
+			paragraph = strings.TrimSpace(paragraph)
+
 			if strings.HasPrefix(paragraph, "Лот") {
 
 				newPlot := entity.Lot{
@@ -95,7 +97,6 @@ func (s *gurievskGovScraper) ScrapLot() ([]entity.Lot, error) {
 				}
 
 				re := regexp.MustCompile(`(\d+\.\d+|\d+)\s*кв\.?\s*м\.?`)
-
 				if matches := re.FindStringSubmatch(paragraph); len(matches) > 0 {
 					newPlot.Square, _ = strconv.Atoi(matches[1])
 				}
@@ -108,6 +109,21 @@ func (s *gurievskGovScraper) ScrapLot() ([]entity.Lot, error) {
 				re = regexp.MustCompile(`по адресу:\s*(.*?),?\s*(КН|площадью|$)`)
 				if matches := re.FindStringSubmatch(paragraph); len(matches) > 0 {
 					newPlot.Address = matches[0]
+				}
+
+				re = regexp.MustCompile(`Лот \d*`)
+				if matches := re.FindStringSubmatch(paragraph); len(matches) > 0 {
+
+					lotNum, isFound := strings.CutPrefix(matches[0], "Лот ")
+					if isFound {
+						num, numErr := strconv.Atoi(lotNum)
+						if numErr != nil {
+							return
+						} else {
+							newPlot.Num = num
+						}
+					}
+
 				}
 
 				Lots = append(Lots, newPlot)

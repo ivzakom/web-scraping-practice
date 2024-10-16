@@ -6,14 +6,14 @@ import (
 )
 
 type LotStorage interface {
-	GetOne(id string) entity.Lot
+	GetOne(ctx context.Context, num int, docUrl string) (entity.Lot, error)
 	GetAll(ctx context.Context) ([]entity.LotView, error)
-	Create(lot entity.Lot) entity.Lot
+	Create(lot entity.Lot) error
 	Delete(lot entity.Lot) error
 }
 
 type LotScraper interface {
-	ScrapLot() ([]entity.Lot, error)
+	Scrap() ([]entity.Lot, error)
 }
 
 type lotService struct {
@@ -21,26 +21,22 @@ type lotService struct {
 	lotScraper LotScraper
 }
 
-func NewLotService(storage LotStorage, scraper LotScraper) *lotService {
-	return &lotService{storage, scraper}
+func NewLotService(storage LotStorage, scraper LotScraper) lotService {
+	return lotService{storage, scraper}
 }
 
-func (s lotService) GetOne(id string) entity.Lot {
-	return entity.Lot{}
+func (s lotService) GetOne(ctx context.Context, num int, docUrl string) (entity.Lot, error) {
+	return s.lotStorage.GetOne(ctx, num, docUrl)
 }
 
 func (s lotService) GetAll(ctx context.Context) ([]entity.LotView, error) {
 	return s.lotStorage.GetAll(ctx)
 }
 
-func (s lotService) Create(lot entity.Lot) entity.Lot {
+func (s lotService) Create(lot entity.Lot) error {
 	return s.lotStorage.Create(lot)
 }
 
-func (s lotService) Delete(lot entity.Lot) error {
-	return s.lotStorage.Delete(lot)
-}
-
 func (s lotService) ScrapLot() ([]entity.Lot, error) {
-	return s.lotScraper.ScrapLot()
+	return s.lotScraper.Scrap()
 }
