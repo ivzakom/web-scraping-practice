@@ -3,7 +3,7 @@ package v1
 import (
 	"context"
 	"encoding/json"
-	"github.com/ivzakom/web-scraping-practice/internal/domain/entity"
+	"github.com/ivzakom/web-scraping-practice/internal/controller/http/dto"
 	"github.com/julienschmidt/httprouter"
 	"net/http"
 )
@@ -14,7 +14,7 @@ const (
 )
 
 type LotUseCase interface {
-	GetAllLots(ctx context.Context) ([]entity.LotView, error)
+	GetAllLots(ctx context.Context) ([]dto.LotViewDto, error)
 	UpdateLots(ctx context.Context) error
 }
 
@@ -36,6 +36,7 @@ func (h *lotHandler) GetAllLots(w http.ResponseWriter, r *http.Request, params h
 	if err != nil {
 		return
 	}
+
 	marshal, err := json.Marshal(lots)
 	if err != nil {
 		return
