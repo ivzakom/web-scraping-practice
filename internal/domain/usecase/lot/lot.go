@@ -10,7 +10,7 @@ import (
 
 type LotService interface {
 	Create(lot entity.Lot) error
-	GetAll(context.Context) ([]entity.Lot, error)
+	GetAll(context.Context) ([]entity.LotView, error)
 	ScrapLot() ([]entity.Lot, error)
 	GetOne(context.Context, int, string) (entity.Lot, error)
 }

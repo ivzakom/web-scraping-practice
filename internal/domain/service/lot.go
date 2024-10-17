@@ -7,7 +7,7 @@ import (
 
 type LotStorage interface {
 	GetOne(ctx context.Context, num int, docUrl string) (entity.Lot, error)
-	GetAll(ctx context.Context) ([]entity.Lot, error)
+	GetAll(ctx context.Context) ([]entity.LotView, error)
 	Create(lot entity.Lot) error
 }
 
@@ -28,7 +28,7 @@ func (s *lotService) GetOne(ctx context.Context, num int, docUrl string) (entity
 	return s.lotStorage.GetOne(ctx, num, docUrl)
 }
 
-func (s *lotService) GetAll(ctx context.Context) ([]entity.Lot, error) {
+func (s *lotService) GetAll(ctx context.Context) ([]entity.LotView, error) {
 
 	allLotView, err := s.lotStorage.GetAll(ctx)
 	if err != nil {
