@@ -9,7 +9,6 @@ type LotStorage interface {
 	GetOne(ctx context.Context, num int, docUrl string) (entity.Lot, error)
 	GetAll(ctx context.Context) ([]entity.LotView, error)
 	Create(lot entity.Lot) error
-	Delete(lot entity.Lot) error
 }
 
 type LotScraper interface {
@@ -21,22 +20,22 @@ type lotService struct {
 	lotScraper LotScraper
 }
 
-func NewLotService(storage LotStorage, scraper LotScraper) lotService {
-	return lotService{storage, scraper}
+func NewLotService(storage LotStorage, scraper LotScraper) *lotService {
+	return &lotService{storage, scraper}
 }
 
-func (s lotService) GetOne(ctx context.Context, num int, docUrl string) (entity.Lot, error) {
+func (s *lotService) GetOne(ctx context.Context, num int, docUrl string) (entity.Lot, error) {
 	return s.lotStorage.GetOne(ctx, num, docUrl)
 }
 
-func (s lotService) GetAll(ctx context.Context) ([]entity.LotView, error) {
+func (s *lotService) GetAll(ctx context.Context) ([]entity.LotView, error) {
 	return s.lotStorage.GetAll(ctx)
 }
 
-func (s lotService) Create(lot entity.Lot) error {
+func (s *lotService) Create(lot entity.Lot) error {
 	return s.lotStorage.Create(lot)
 }
 
-func (s lotService) ScrapLot() ([]entity.Lot, error) {
+func (s *lotService) ScrapLot() ([]entity.Lot, error) {
 	return s.lotScraper.Scrap()
 }

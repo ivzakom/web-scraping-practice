@@ -27,8 +27,8 @@ func (h *lotHandler) Register(r *httprouter.Router) {
 	r.GET(updateLots, h.UpdateLots)
 }
 
-func NewLotHandler(lotUseCase LotUseCase) lotHandler {
-	return lotHandler{lotUseCase: lotUseCase}
+func NewLotHandler(lotUseCase LotUseCase) *lotHandler {
+	return &lotHandler{lotUseCase: lotUseCase}
 }
 
 func (h *lotHandler) GetAllLots(w http.ResponseWriter, r *http.Request, params httprouter.Params) {

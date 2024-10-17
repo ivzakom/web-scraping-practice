@@ -18,8 +18,8 @@ type lotStorage struct {
 	db *mongo.Database
 }
 
-func NewLotStorage(db *mongo.Database) lotStorage {
-	return lotStorage{db: db}
+func NewLotStorage(db *mongo.Database) *lotStorage {
+	return &lotStorage{db: db}
 }
 
 func (bs *lotStorage) GetOne(ctx context.Context, num int, url string) (lot entity.Lot, err error) {

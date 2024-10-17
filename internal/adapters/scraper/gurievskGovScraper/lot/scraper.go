@@ -16,8 +16,8 @@ type gurievskGovScraper struct {
 	BaseParam string
 }
 
-func NewGurievskGovScraper() gurievskGovScraper {
-	return gurievskGovScraper{
+func NewGurievskGovScraper() *gurievskGovScraper {
+	return &gurievskGovScraper{
 		BaseURL:   "gurievsk.gov39.ru/grazhdanam/land-lease/",
 		BaseParam: "SECTION_ID=7247",
 	}

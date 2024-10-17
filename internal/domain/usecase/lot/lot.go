@@ -18,11 +18,11 @@ type lotUseCase struct {
 	lotService LotService
 }
 
-func NewLotUseCase(lotService LotService) lotUseCase {
-	return lotUseCase{lotService}
+func NewLotUseCase(lotService LotService) *lotUseCase {
+	return &lotUseCase{lotService}
 }
 
-func (u lotUseCase) GetAllLots(ctx context.Context) ([]entity.LotView, error) {
+func (u *lotUseCase) GetAllLots(ctx context.Context) ([]entity.LotView, error) {
 	all, err := u.lotService.GetAll(ctx)
 	if err != nil {
 		return nil, err
@@ -30,7 +30,7 @@ func (u lotUseCase) GetAllLots(ctx context.Context) ([]entity.LotView, error) {
 	return all, nil
 }
 
-func (u lotUseCase) UpdateLots(ctx context.Context) error {
+func (u *lotUseCase) UpdateLots(ctx context.Context) error {
 
 	lots, err := u.lotService.ScrapLot()
 	if err != nil {
