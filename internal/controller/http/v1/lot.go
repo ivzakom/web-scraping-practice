@@ -11,6 +11,7 @@ import (
 const (
 	lotsURL    = "/lots"
 	updateLots = "/lots/update"
+	pkkInfo    = "/lots/pkkInfo"
 )
 
 type LotUseCase interface {
@@ -25,6 +26,7 @@ type lotHandler struct {
 func (h *lotHandler) Register(r *httprouter.Router) {
 	r.GET(lotsURL, h.GetAllLots)
 	r.GET(updateLots, h.UpdateLots)
+	r.GET(pkkInfo, h.UpdateLots)
 }
 
 func NewLotHandler(lotUseCase LotUseCase) *lotHandler {
@@ -54,4 +56,9 @@ func (h *lotHandler) UpdateLots(w http.ResponseWriter, r *http.Request, params h
 		w.WriteHeader(http.StatusBadRequest)
 	}
 	w.WriteHeader(http.StatusOK)
+}
+
+func (h *lotHandler) GetPkkInfo(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
+	//scrap := pkkRosreestr.NewGurievskGovScraper()
+	//scrap.Scrap(entity.Lot{})
 }

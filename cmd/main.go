@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	pkkRosreestrScraper "github.com/ivzakom/web-scraping-practice/internal/adapters/api/pkkRosreestr/lot"
 	mongodb "github.com/ivzakom/web-scraping-practice/internal/adapters/db/mongodb/lot"
 	gurievskGovScraper "github.com/ivzakom/web-scraping-practice/internal/adapters/scraper/gurievskGovScraper/lot"
 	"github.com/ivzakom/web-scraping-practice/internal/config"
@@ -21,6 +22,16 @@ import (
 
 func main() {
 
+	ctx := context.Background()
+
+	scrap := pkkRosreestrScraper.NewPkkRosreestrGovScraper()
+	dto, err := scrap.Scrap(ctx, "39:03:070901:221")
+	if err != nil {
+		return
+	}
+
+	fmt.Println(dto)
+
 	cfg := config.GetConfig()
 	cfgMongo := cfg.MongoDB
 	MongoDBCient, err := mongo.NewClient(context.Background(), cfgMongo.Host, cfgMongo.Port, cfgMongo.Username, cfgMongo.Password, cfgMongo.Database, cfgMongo.AuthDB)
@@ -29,8 +40,8 @@ func main() {
 	}
 
 	lotStorage := mongodb.NewLotStorage(MongoDBCient)
-	lotScraper := gurievskGovScraper.NewGurievskGovScraper()
-	lotService := service.NewLotService(lotStorage, lotScraper)
+	gurievskLotScraper := gurievskGovScraper.NewGurievskGovScraper()
+	lotService := service.NewLotService(lotStorage, gurievskLotScraper)
 	lotUseCase := lot_usecase.NewLotUseCase(lotService)
 	lotHandler := v1.NewLotHandler(lotUseCase)
 
