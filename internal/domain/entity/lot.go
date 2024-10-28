@@ -6,6 +6,7 @@ type Lot struct {
 	ID              string    `json:"id" bson:"id"`
 	Num             int       `json:"num" bson:"num"`
 	NoticeNumber    string    `json:"notice_number" bson:"notice_number"`
+	NoticeDate      time.Time `json:"notice_date" bson:"notice_date"`
 	Description     string    `json:"description,omitempty" bson:"description"`
 	Address         string    `json:"address,omitempty" bson:"address"`
 	CadastreNumber  string    `json:"cadastre_number,omitempty" bson:"cadastreNumber"`

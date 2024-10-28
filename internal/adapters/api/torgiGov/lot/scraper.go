@@ -138,6 +138,7 @@ func NewTorgiGovScraper() *torgiGovScraper {
 		"size":           "10",
 		"sort":           "firstVersionPublicationDate,desc",
 		"catCode":        "2",
+		"noticeStatus":   "APPLICATIONS_SUBMISSION,PUBLISHED",
 	}
 
 	lotcardsParams := map[string]string{
@@ -201,14 +202,11 @@ func (s *torgiGovScraper) ScrapNotices(ctx context.Context, params map[string]st
 		return nil, err
 	}
 
-	if data.TotalPages == data.Pageable.PageNumber {
-		return nil, apperror.ErrorEOL
-	}
-
 	var lotsDto []TorgiGovLotDto
 	for _, notice := range data.Content {
 
 		noticeNumber := notice.NoticeNumber
+		PublishDate := notice.PublishDate
 		biddStartTime := notice.BiddStartTime
 		biddEndTime := notice.BiddEndTime
 		auctionStartDate := notice.AuctionStartDate
@@ -222,6 +220,7 @@ func (s *torgiGovScraper) ScrapNotices(ctx context.Context, params map[string]st
 			lotDto.BiddStartTime = biddStartTime
 			lotDto.BiddEndTime = biddEndTime
 			lotDto.AuctionStartDate = auctionStartDate
+			lotDto.PublishDate = PublishDate
 
 			lotDto.Url = s.createUrl(noticeNumber, lotDto.LotNumber)
 
@@ -230,7 +229,11 @@ func (s *torgiGovScraper) ScrapNotices(ctx context.Context, params map[string]st
 
 	}
 
-	return lotsDto, nil
+	if data.Last {
+		err = apperror.ErrorEOL
+	}
+
+	return lotsDto, err
 
 }
 

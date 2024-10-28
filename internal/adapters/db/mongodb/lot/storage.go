@@ -8,6 +8,7 @@ import (
 	"github.com/ivzakom/web-scraping-practice/internal/domain/entity"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
+	"time"
 )
 
 const (
@@ -70,4 +71,36 @@ func (bs *lotStorage) Create(l entity.Lot) error {
 		return err
 	}
 	return nil
+}
+
+func (bs *lotStorage) GetLastDateUpdate(ctx context.Context) time.Time {
+
+	lastUpdateDate := time.Now().AddDate(-1, 0, 0)
+
+	pipeline := mongo.Pipeline{
+		{{Key: "$sort", Value: bson.D{{Key: "notice_date", Value: -1}}}},
+		{{Key: "$limit", Value: 1}},
+		{{Key: "$project", Value: bson.D{{Key: "notice_date", Value: 1}}}}, // Проекция только для PublishDate
+	}
+
+	cursor, err := bs.db.Collection(lotsCollection).Aggregate(ctx, pipeline)
+	if err != nil {
+		return time.Time{}
+	}
+	defer cursor.Close(ctx)
+
+	var result struct {
+		NoticeDate time.Time `bson:"notice_date"`
+	}
+
+	if cursor.Next(ctx) {
+		if err := cursor.Decode(&result); err != nil {
+			return lastUpdateDate
+		}
+		return result.NoticeDate // Возвращаем найденную максимальную дату
+	}
+
+	// Возвращаем минимальную дату при отсутствии документов
+	return lastUpdateDate
+
 }

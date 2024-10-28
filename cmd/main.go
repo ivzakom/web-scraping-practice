@@ -36,7 +36,7 @@ func main() {
 	gurievskLotScraper := gurievskGovScraper.NewGurievskGovScraper()
 	torgiGovScraper := torgiGov.NewTorgiGovScraper()
 
-	lotService := service.NewLotService(lotStorage, lotStorage, pkkScraper, gurievskLotScraper)
+	lotService := service.NewLotService(lotStorage, pkkScraper, gurievskLotScraper, torgiGovScraper)
 	lotUseCase := lot_usecase.NewLotUseCase(lotService)
 	lotHandler := v1.NewLotHandler(lotUseCase)
 

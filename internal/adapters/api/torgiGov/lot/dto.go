@@ -13,6 +13,7 @@ type TorgiGovLotDto struct {
 	BiddEndTime      time.Time `json:"biddEndTime"`
 	AuctionStartDate time.Time `json:"auctionStartDate"`
 	NoticeNumber     string    `json:"noticeNumber"`
+	PublishDate      time.Time `json:"publishDate"`
 	IsAnnulled       bool      `json:"isAnnulled"`
 	Url              string    `json:"url"`
 	Attributes       []struct {

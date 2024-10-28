@@ -16,6 +16,7 @@ type LotStorage interface {
 	GetOne(ctx context.Context, num int, docUrl string) (entity.Lot, error)
 	GetAll(ctx context.Context) ([]entity.LotView, error)
 	Create(lot entity.Lot) error
+	GetLastDateUpdate(ctx context.Context) time.Time
 }
 
 type PkkScraper interface {
@@ -80,12 +81,8 @@ func (s *lotService) ScrapNewNotices(ctx context.Context, lastUpdateDate time.Ti
 		prams["page"] = strconv.Itoa(i)
 
 		lotsDto, scrapErr := s.torgiGovScraper.ScrapNotices(ctx, prams)
-		if scrapErr != nil {
-			if errors.Is(scrapErr, apperror.ErrorEOL) {
-				return findedLots, nil
-			} else {
-				return nil, err
-			}
+		if scrapErr != nil && !errors.Is(scrapErr, apperror.ErrorEOL) {
+			return nil, err
 		}
 
 		for _, lotDto := range lotsDto {
@@ -97,6 +94,10 @@ func (s *lotService) ScrapNewNotices(ctx context.Context, lastUpdateDate time.Ti
 
 			findedLots = append(findedLots, lot)
 
+		}
+
+		if errors.Is(scrapErr, apperror.ErrorEOL) {
+			break
 		}
 
 	}
@@ -112,8 +113,13 @@ func (s *lotService) EnrichLotByPkkRosreestr(lot *entity.Lot) error {
 		return err
 	}
 
-	copier.Copy(lot.RosreestrData, &rosreestrLotDto)
-	lot.Address = rosreestrLotDto.Features[0].Attrs.Address
+	err = copier.Copy(&lot.RosreestrData, &rosreestrLotDto)
+	if err != nil {
+		return err
+	}
+	if len(rosreestrLotDto.Features) > 0 {
+		lot.Address = rosreestrLotDto.Features[0].Attrs.Address
+	}
 	lot.CadastreNumber = rosreestrLotDto.CadastreNumber
 
 	return nil
@@ -128,46 +134,22 @@ func (s *lotService) UpdateCreateLot(lot entity.Lot) error {
 func convertLot(lotDto torgiGov.TorgiGovLotDto) (entity.Lot, error) {
 
 	lot := entity.Lot{
-		Num:             0,
-		NoticeNumber:    lotDto.NoticeNumber,
-		Description:     lotDto.LotName,
-		Address:         "",
-		CadastreNumber:  "",
-		Square:          0,
-		DocURL:          lotDto.Url,
-		PublicationDate: time.Time{},
-		Price:           lotDto.PriceMin,
-		RosreestrData: struct {
-			Total         int    `json:"total"`
-			TotalRelation string `json:"total_relation"`
-			Features      []struct {
-				Center struct {
-					Y float64 `json:"y"`
-					X float64 `json:"x"`
-				} `json:"center"`
-				Extent struct {
-					Xmin float64 `json:"xmin"`
-					Xmax float64 `json:"xmax"`
-					Ymax float64 `json:"ymax"`
-					Ymin float64 `json:"ymin"`
-				} `json:"extent"`
-				Sort  int64 `json:"sort"`
-				Type  int   `json:"type"`
-				Attrs struct {
-					Address      string `json:"address"`
-					CategoryType string `json:"category_type"`
-					Cn           string `json:"cn"`
-					Id           string `json:"id"`
-				} `json:"attrs"`
-			} `json:"features"`
-		}{},
+		NoticeNumber: lotDto.NoticeNumber,
+		NoticeDate:   lotDto.PublishDate,
+		Description:  lotDto.LotName,
+		DocURL:       lotDto.Url,
+		Price:        lotDto.PriceMin,
 	}
 
-	err := copier.Copy(&lot.TorgiGovData, &lotDto)
+	err := copier.Copy(&lot.TorgiGovData, lotDto)
 	if err != nil {
 		return entity.Lot{}, err
 	}
 
 	return lot, nil
 
+}
+
+func (s *lotService) GetLastDateUpdate(ctx context.Context) time.Time {
+	return s.lotStorage.GetLastDateUpdate(ctx)
 }
