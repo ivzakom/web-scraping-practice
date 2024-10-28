@@ -17,6 +17,7 @@ const (
 type LotUseCase interface {
 	GetAllLots(ctx context.Context) ([]dto.LotViewDto, error)
 	UpdateLots(ctx context.Context) error
+	GetNewLots(ctx context.Context) error
 }
 
 type lotHandler struct {
@@ -51,7 +52,7 @@ func (h *lotHandler) GetAllLots(w http.ResponseWriter, r *http.Request, params h
 }
 
 func (h *lotHandler) UpdateLots(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
-	err := h.lotUseCase.UpdateLots(context.Background())
+	err := h.lotUseCase.GetNewLots(context.Background())
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 	}

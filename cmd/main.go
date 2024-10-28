@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	pkkRosreestrScraper "github.com/ivzakom/web-scraping-practice/internal/adapters/api/pkkRosreestr/lot"
+	torgiGov "github.com/ivzakom/web-scraping-practice/internal/adapters/api/torgiGov/lot"
 	mongodb "github.com/ivzakom/web-scraping-practice/internal/adapters/db/mongodb/lot"
 	gurievskGovScraper "github.com/ivzakom/web-scraping-practice/internal/adapters/scraper/gurievskGovScraper/lot"
 	"github.com/ivzakom/web-scraping-practice/internal/config"
@@ -30,9 +31,12 @@ func main() {
 	}
 
 	lotStorage := mongodb.NewLotStorage(MongoDBCient)
+
 	pkkScraper := pkkRosreestrScraper.NewPkkRosreestrGovScraper()
-	gurievskLotScraper := gurievskGovScraper.NewGurievskGovScraper(pkkScraper)
-	lotService := service.NewLotService(lotStorage, gurievskLotScraper)
+	gurievskLotScraper := gurievskGovScraper.NewGurievskGovScraper()
+	torgiGovScraper := torgiGov.NewTorgiGovScraper()
+
+	lotService := service.NewLotService(lotStorage, pkkScraper, gurievskLotScraper, torgiGovScraper)
 	lotUseCase := lot_usecase.NewLotUseCase(lotService)
 	lotHandler := v1.NewLotHandler(lotUseCase)
 

@@ -1,12 +1,9 @@
 package gurievskGovScraper
 
 import (
-	"context"
 	"fmt"
 	"github.com/gocolly/colly"
-	pkkRosreestrScraper "github.com/ivzakom/web-scraping-practice/internal/adapters/api/pkkRosreestr/lot"
 	"github.com/ivzakom/web-scraping-practice/internal/domain/entity"
-	"github.com/jinzhu/copier"
 	"log"
 	"regexp"
 	"strconv"
@@ -14,21 +11,15 @@ import (
 	"time"
 )
 
-type PkkScraper interface {
-	Scrap(ctx context.Context, CadastreNumber string) (pkkRosreestrScraper.PkkRosreestrLotDto, error)
-}
-
 type gurievskGovScraper struct {
-	BaseURL    string
-	BaseParam  string
-	pkkScraper PkkScraper
+	BaseURL   string
+	BaseParam string
 }
 
-func NewGurievskGovScraper(pkkScraper PkkScraper) *gurievskGovScraper {
+func NewGurievskGovScraper() *gurievskGovScraper {
 	return &gurievskGovScraper{
-		BaseURL:    "gurievsk.gov39.ru/grazhdanam/land-lease/",
-		BaseParam:  "SECTION_ID=7247",
-		pkkScraper: pkkScraper,
+		BaseURL:   "gurievsk.gov39.ru/grazhdanam/land-lease/",
+		BaseParam: "SECTION_ID=7247",
 	}
 }
 
@@ -108,19 +99,6 @@ func (s *gurievskGovScraper) Scrap() ([]entity.Lot, error) {
 				re := regexp.MustCompile(`(\d+\.\d+|\d+)\s*кв\.?\s*м\.?`)
 				if matches := re.FindStringSubmatch(paragraph); len(matches) > 0 {
 					newPlot.Square, _ = strconv.Atoi(matches[1])
-				}
-
-				re = regexp.MustCompile(`КН\s*\d{2}:\d{2}:\d{6,7}:\d+`)
-				if matches := re.FindStringSubmatch(paragraph); len(matches) > 0 {
-					CadastreNumber := matches[0][5:]
-					newPlot.CadastreNumber = CadastreNumber
-
-					rosreestrData, rosreestrErr := s.pkkScraper.Scrap(context.Background(), CadastreNumber)
-					if rosreestrErr != nil {
-						return
-					}
-					copier.Copy(&newPlot.RosreestrData, &rosreestrData)
-
 				}
 
 				re = regexp.MustCompile(`по адресу:\s*(.*?),?\s*(КН|площадью|$)`)
