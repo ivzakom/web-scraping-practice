@@ -1,4 +1,4 @@
-package pkkRosreestrScraper
+package pkkRosreestr
 
 import (
 	"context"
@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"regexp"
 	"strings"
 )
 
@@ -21,7 +22,30 @@ func NewPkkRosreestrGovScraper() *pkkRosreestrScraper {
 	}
 }
 
-func (s *pkkRosreestrScraper) Scrap(ctx context.Context, CadastreNumber string) (PkkRosreestrLotDto, error) {
+func (s *pkkRosreestrScraper) GetLocationPoint(Decription string) (PkkRosreestrLotDto, error) {
+
+	var (
+		lotDto PkkRosreestrLotDto
+		err    error
+	)
+
+	re := regexp.MustCompile(`КН\s*\d{2}:\d{2}:\d{6,7}:\d+`)
+	if matches := re.FindStringSubmatch(Decription); len(matches) > 0 {
+		CadastreNumber := matches[0][5:]
+		lotDto.CadastreNumber = CadastreNumber
+
+		lotDto, err = s.getDataByCadastreNumber(context.Background(), CadastreNumber)
+		if err != nil {
+			return PkkRosreestrLotDto{}, err
+		}
+
+	}
+
+	return lotDto, err
+
+}
+
+func (s *pkkRosreestrScraper) getDataByCadastreNumber(ctx context.Context, CadastreNumber string) (PkkRosreestrLotDto, error) {
 
 	pkkCadastreNumber := normalizeCadastreNumber(CadastreNumber)
 	url := fmt.Sprint("https://", s.BaseURL, pkkCadastreNumber)

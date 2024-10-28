@@ -4,6 +4,7 @@ import "encoding/json"
 
 var (
 	ErrorNotFound = NewAppError(nil, "not found", "", "US-000003")
+	ErrorEOL      = NewAppError(nil, "end of list", "", "US-000004")
 )
 
 type AppError struct {

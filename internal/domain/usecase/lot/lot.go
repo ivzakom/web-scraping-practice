@@ -6,6 +6,7 @@ import (
 	"github.com/ivzakom/web-scraping-practice/internal/apperror"
 	"github.com/ivzakom/web-scraping-practice/internal/controller/http/dto"
 	"github.com/ivzakom/web-scraping-practice/internal/domain/entity"
+	"time"
 )
 
 type LotService interface {
@@ -13,6 +14,10 @@ type LotService interface {
 	GetAll(context.Context) ([]entity.LotView, error)
 	ScrapLot() ([]entity.Lot, error)
 	GetOne(context.Context, int, string) (entity.Lot, error)
+	GetLastDateUpdate(context.Context) time.Time
+	ScrapNewNotices(ctx context.Context, lastUpdateDate time.Time) ([]entity.Lot, error)
+	EnrichLotByPkkRosreestr(*entity.Lot) error
+	UpdateCreateLot(entity.Lot) error
 }
 
 type lotUseCase struct {
@@ -70,4 +75,27 @@ func (u *lotUseCase) UpdateLots(ctx context.Context) error {
 
 	}
 	return err
+}
+
+func (u *lotUseCase) GetNewLots(ctx context.Context) error {
+
+	var err error
+
+	lastDateUpdate := u.lotService.GetLastDateUpdate(ctx)
+	noticeLots, ScrapErr := u.lotService.ScrapNewNotices(ctx, lastDateUpdate)
+	if ScrapErr != nil {
+		return ScrapErr
+	}
+	for _, lot := range noticeLots {
+		err = u.lotService.EnrichLotByPkkRosreestr(&lot)
+		if err != nil {
+			return err
+		}
+		err = u.lotService.UpdateCreateLot(lot)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }

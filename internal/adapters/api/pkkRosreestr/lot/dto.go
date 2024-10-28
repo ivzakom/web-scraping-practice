@@ -1,9 +1,10 @@
-package pkkRosreestrScraper
+package pkkRosreestr
 
 type PkkRosreestrLotDto struct {
-	Total         int    `json:"total"`
-	TotalRelation string `json:"total_relation"`
-	Features      []struct {
+	CadastreNumber string `json:"cadastreNumber"`
+	Total          int    `json:"total"`
+	TotalRelation  string `json:"total_relation"`
+	Features       []struct {
 		Center struct {
 			Y float64 `json:"y"`
 			X float64 `json:"x"`
